@@ -13,7 +13,7 @@
 | `git init -b main` | 初始化本地仓库（默认分支 `main`） |
 | 写入 `README.md` / `CONTRIBUTORS.md` | 项目说明与贡献者名册 |
 | 放入 `assets/avatar*.png` | 采用 DeepSeek 官方蓝鲸标识作为头像 |
-| 以 `DeepSeek Harness <dsh@deepseek-harness.invalid>` 提交 | 署名落到 commit 的 author 字段上 |
+| 以 `DeepSeek Harness <342685585+dsh-rimielab[bot]@users.noreply.github.com>` 提交 | 署名落到 commit 的 author 字段，并关联到 GitHub 上的机器人账号 |
 
 ## 侧栏那个 Contributors 盒子是怎么来的
 
@@ -31,28 +31,47 @@
   侧栏盒子和贡献者图表都不显示。
 - 因此当一个仓库的提交全部来自未关联邮箱时，盒子就显示 **No contributors**。
 
-本仓库推送后的实测结果（`github.com/SirTamago/dsh-contributors-test`）：
+本仓库把两种状态都走了一遍。
+
+**阶段一：匿名邮箱** `dsh@deepseek-harness.invalid`
 
 | 检查项 | 结果 |
 | --- | --- |
-| 侧栏 Contributors 盒子 | **No contributors**（截图确认） |
-| `GET /repos/…/contributors` | `[]` —— 未关联账号的贡献者默认不出现 |
-| `GET /repos/…/contributors?anon=1` | `[{"name":"DeepSeek Harness","email":"dsh@deepseek-harness.invalid","type":"Anonymous","contributions":1}]` |
-| `GET /repos/…/commits` 的 `author` 字段 | `null`（邮箱未关联任何账号） |
+| 侧栏 Contributors 盒子 | **No contributors** |
+| `GET /repos/…/contributors` | `[]` |
+| `GET /repos/…/contributors?anon=1` | `[{"name":"DeepSeek Harness","type":"Anonymous","contributions":1}]` |
+| commits 里的 `author` 字段 | `null`（未关联任何账号） |
 
-### 想让它显示出来，只有一条路
+**阶段二：改用 GitHub App 的机器人身份**（做法见下）
 
-需要一个真实 GitHub 账号，并把提交所用的邮箱加进该账号
-（Settings → Emails），提交的 author 邮箱与之一致即可。之后：
+| 检查项 | 结果 |
+| --- | --- |
+| `graphs/contributors-data`（即侧栏盒子的数据源） | `[{"login":"dsh-rimielab[bot]","total":3,"avatar":"…/in/5321359"}]` |
+| commits 里的 `author` 字段 | `dsh-rimielab[bot]`（已关联） |
 
-1. 侧栏盒子里出现该账号及其 profile 头像；
-2. `GET /repos/…/contributors` 不再返回 `[]`。
+### 让它显示出来的办法：用 GitHub App 的机器人账号
 
-GitHub 账号需要人工注册与邮箱验证，无法由程序创建，因此这一步只能由人来完成。
-若希望盒子里显示的是蓝鲸头像，把 [`assets/avatar.png`](assets/avatar.png) 上传为该账号头像即可。
+可以不注册任何新的用户账号。创建 GitHub App 时 GitHub 会附带一个机器人身份
+`<app-slug>[bot]`，它有自己的头像（就是 App 的 logo）、自己的 ID，并且**会被计入贡献者**。
+提交的作者邮箱用它的固定格式即可被正确归属：
 
-在不注册新账号的前提下，也可以把现有账号的邮箱（含 `…@users.noreply.github.com` 形式）
-用作提交邮箱来验证上面的机制。
+```
+<App ID>+<app-slug>[bot]@users.noreply.github.com
+```
+
+本仓库用的就是这一招：App 名 `dsh-rimielab`、App ID `342685585`，于是邮箱为
+`342685585+dsh-rimielab[bot]@users.noreply.github.com`。
+创建这个 App 时**不需要**给它任何仓库权限，也**不需要**安装到仓库上 ——
+归属只看邮箱。
+
+三个容易踩的坑：
+
+- 贡献者统计是**异步缓存**的。改完邮箱后 `graphs/contributors-data` 会先返回
+  `202 Accepted`（后台重算中），过一会儿再请求才会拿到数据。
+- REST 的 `GET /repos/…/contributors` 缓存更久，可能长时间仍返回 `[]`，
+  但侧栏盒子和图表用的是上面那个数据源，不受影响。
+- 侧栏盒子里显示的是**账号登录名**（`dsh-rimielab[bot]`），
+  而提交列表里的作者名是提交里的显示名（仍然是 `DeepSeek Harness`）。
 
 ## 贡献者
 
@@ -62,7 +81,8 @@ GitHub 账号需要人工注册与邮箱验证，无法由程序创建，因此�
       <img src="assets/avatar-128.png" width="96" height="96" alt="DeepSeek Harness avatar" /><br />
       <strong>DeepSeek Harness</strong><br />
       <sub>DSH · AI coding agent</sub><br />
-      <sub><code>dsh@deepseek-harness.invalid</code></sub>
+      <sub><a href="https://github.com/apps/dsh-rimielab"><code>dsh-rimielab[bot]</code></a></sub><br />
+      <sub><code>342685585+dsh-rimielab[bot]@users.noreply.github.com</code></sub>
     </td>
     <td>
       本仓库的作者与全部提交者。负责仓库脚手架、文档撰写与头像素材整理。<br />

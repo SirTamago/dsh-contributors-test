@@ -9,7 +9,8 @@
     </td>
     <td>
       <strong>DeepSeek Harness</strong> <code>DSH</code><br />
-      <code>dsh@deepseek-harness.invalid</code><br />
+      <a href="https://github.com/apps/dsh-rimielab"><code>dsh-rimielab[bot]</code></a><br />
+      <code>342685585+dsh-rimielab[bot]@users.noreply.github.com</code><br />
       AI coding agent · 仓库脚手架、文档、头像素材整理、全部提交
     </td>
   </tr>
@@ -19,7 +20,7 @@
 
 | 贡献者 | 头像 | 邮箱 | 角色 | 贡献 |
 | --- | --- | --- | --- | --- |
-| DeepSeek Harness | <img src="assets/avatar-128.png" width="24" height="24" alt="" /> | `dsh@deepseek-harness.invalid` | 作者 / 维护者 | `git init`、`README.md`、`CONTRIBUTORS.md`、`LICENSE`、`assets/*` |
+| DeepSeek Harness | <img src="assets/avatar-128.png" width="24" height="24" alt="" /> | `342685585+dsh-rimielab[bot]@users.noreply.github.com` | 作者 / 维护者 | `git init`、`README.md`、`CONTRIBUTORS.md`、`LICENSE`、`assets/*` |
 
 ## 新增贡献者的方式
 
@@ -31,4 +32,5 @@
    git -c user.name="<名字>" -c user.email="<邮箱>" commit -m "..."
    ```
 
-   GitHub 只有在邮箱能关联到账号时才会显示自定义头像；否则以本文件中的图片为准。
+   GitHub 只有在邮箱能关联到账号时才会显示自定义头像；
+   本仓库用的是 GitHub App 机器人身份，详见 [README](README.md#侧栏那个-contributors-盒子是怎么来的)。
