@@ -46,7 +46,7 @@
 
 | 检查项 | 结果 |
 | --- | --- |
-| `graphs/contributors-data`（即侧栏盒子的数据源） | `[{"login":"dsh-rimielab[bot]","total":3,"avatar":"…/in/5321359"}]` |
+| `graphs/contributors-data`（即侧栏盒子的数据源） | `[{"login":"dsh-rimielab[bot]","total":<提交数>,"avatar":"…/in/5321359"}]` |
 | commits 里的 `author` 字段 | `dsh-rimielab[bot]`（已关联） |
 
 ### 让它显示出来的办法：用 GitHub App 的机器人账号
