@@ -1,0 +1,4 @@
+# 把同一贡献者的不同署名写法归一化到同一身份。
+# 格式：正式姓名 <正式邮箱> 其他署名 <其他邮箱>
+DeepSeek Harness <dsh@deepseek-harness.invalid> <dsh@deepseek-harness.local>
+DeepSeek Harness <dsh@deepseek-harness.invalid> DSH <dsh@deepseek-harness.invalid>
