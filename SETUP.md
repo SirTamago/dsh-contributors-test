@@ -35,6 +35,25 @@ Settings → Developer settings → GitHub Apps → New GitHub App：
 由 `dsh-rimielab[bot]` 完成：仓库脚手架、`README.md` / `CONTRIBUTORS.md` / 本文档、
 头像素材整理、历史改写与全部提交。
 
+## 提交身份配置
+
+本仓库的**默认**提交身份是人（在仓库目录里 `git config` 即可，不会影响其他仓库）：
+
+```bash
+git config user.name  "Rimrose"
+git config user.email "44104592+SirTamago@users.noreply.github.com"
+```
+
+要以机器人身份提交时，用 `-c` 临时覆盖，不要在仓库里全局改成机器人：
+
+```bash
+git -c user.name="DeepSeek Harness" \
+    -c user.email="342685585+dsh-rimielab[bot]@users.noreply.github.com" \
+    commit -m "..."
+```
+
+（本文档所在的那次提交就是这么产生的。）
+
 ## 复现要点
 
 提交作者邮箱的对应关系：
