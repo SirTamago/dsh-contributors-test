@@ -55,19 +55,28 @@ python3 assets/make_avatar.py
 
 ## 关于「GitHub 上搜不到 DSH 账号」
 
-GitHub 的 contributor 列表只在 commit author 邮箱**能关联到一个 GitHub 账号**时，
-才会显示那个账号的头像和链接；关联不上时 GitHub 会显示一个自动生成的灰色占位头像。
+GitHub 只把 commit author 邮箱**能关联到某个账号**的提交算作「已注册贡献者」；
+关联不上的提交会以 *Anonymous* 身份记录，原生 contributor 图里给的是自动生成的灰色占位头像。
 
-因此：
+下面是本仓库推送后在 `github.com/SirTamago/dsh-contributors-test` 上实测到的结果：
 
-- 本仓库里头像由 `README.md` / `CONTRIBUTORS.md` 直接以图片形式渲染 —— 这在 GitHub 页面上同样有效，视觉上就是「贡献者有头像」。
-- 如果希望 GitHub 原生的 contributor 小方块也显示这个头像，需要一个 GitHub 账号并把
-  `dsh@deepseek-harness.invalid` 加为该账号的邮箱（GitHub 账号目前只能由人注册，无法由程序创建）。
-- 在没有账号之前，也可以把它作为 **co-author** 写进提交信息，让 GitHub 页面列出该身份：
+| 检查项 | 结果 |
+| --- | --- |
+| `GET /repos/…/contributors` | `[]` —— 未关联账号的贡献者默认**不出现** |
+| `GET /repos/…/contributors?anon=1` | `{"email":"dsh@deepseek-harness.invalid","name":"DeepSeek Harness","type":"Anonymous","contributions":1}` |
+| `GET /repos/…/commits` 的 `author` 字段 | `null`（邮箱未关联任何账号） |
 
-  ```
-  Co-authored-by: DeepSeek Harness <dsh@deepseek-harness.invalid>
-  ```
+所以要分清两件不同的事：
+
+- **仓库页面上的头像** —— 由 `README.md` / `CONTRIBUTORS.md` 以 `<img>` 直接渲染，GitHub 页面上同样生效，这里是自定义头像。
+- **GitHub 原生的 contributor 小方块** —— 在邮箱关联到真实账号之前，只能是灰色占位头像。GitHub 账号需要人工注册与邮箱验证，无法由程序创建。
+
+在不注册账号的前提下，还有一条可选做法：把它写成 **co-author** 预告到提交信息里，
+GitHub 会在提交页面列出该身份（仍然沿用占位头像）：
+
+```
+Co-authored-by: DeepSeek Harness <dsh@deepseek-harness.invalid>
+```
 
 ## 许可
 
