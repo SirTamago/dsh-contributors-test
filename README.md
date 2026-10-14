@@ -89,6 +89,18 @@
       详见 <a href="CONTRIBUTORS.md">CONTRIBUTORS.md</a>。
     </td>
   </tr>
+  <tr>
+    <td align="center" width="180">
+      <img src="https://avatars.githubusercontent.com/u/44104592?v=4" width="96" height="96" alt="SirTamago avatar" /><br />
+      <strong>Rimrose</strong><br />
+      <sub>仓库所有者</sub><br />
+      <sub><a href="https://github.com/SirTamago"><code>@SirTamago</code></a></sub>
+    </td>
+    <td>
+      创建了 GitHub 仓库与 GitHub App <code>dsh-rimielab</code>（提供带头像的机器人身份），
+      并确定了署名方案。步骤记录见 <a href="SETUP.md">SETUP.md</a>。
+    </td>
+  </tr>
 </table>
 
 > 上表的头像由本文件的 `<img>` 渲染，与侧栏那个 Contributors 盒子无关 —— 后者只认账号。
