@@ -64,7 +64,7 @@
 创建这个 App 时**不需要**给它任何仓库权限，也**不需要**安装到仓库上 ——
 归属只看邮箱。
 
-三个容易踩的坑：
+四个容易踩的坑：
 
 - 贡献者统计是**异步缓存**的。改完邮箱后 `graphs/contributors-data` 会先返回
   `202 Accepted`（后台重算中），过一会儿再请求才会拿到数据。
@@ -72,6 +72,14 @@
   但侧栏盒子和图表用的是上面那个数据源，不受影响。
 - 侧栏盒子里显示的是**账号登录名**（`dsh-rimielab[bot]`），
   而提交列表里的作者名是提交里的显示名（仍然是 `DeepSeek Harness`）。
+- **`Co-authored-by:` 也计入贡献者统计**。本仓库实测：机器人 authored 6 次、
+  co-authored 1 次，`contributors-data` 里报的就是 `total: 7`。
+  也就是说，只想把某人记进贡献者名单时，不必把作者位置让给他，
+  在提交信息里加一行 co-author 即可：
+
+  ```
+  Co-authored-by: Rimrose <44104592+SirTamago@users.noreply.github.com>
+  ```
 
 ## 贡献者
 
