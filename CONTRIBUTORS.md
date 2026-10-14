@@ -10,7 +10,7 @@
     <td>
       <strong>DeepSeek Harness</strong> <code>DSH</code><br />
       <code>dsh@deepseek-harness.invalid</code><br />
-      AI coding agent · 仓库脚手架、文档、头像素材生成、全部提交
+      AI coding agent · 仓库脚手架、文档、头像素材整理、全部提交
     </td>
   </tr>
 </table>
