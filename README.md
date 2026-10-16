@@ -81,6 +81,28 @@
   Co-authored-by: Rimrose <44104592+SirTamago@users.noreply.github.com>
   ```
 
+### 机器人身份的一个代价：没有 hovercard
+
+鼠标悬停在 `dsh-rimielab[bot]` 上会显示 `Failed to fetch hovercard content: 404`，
+而真实用户账号会弹出完整名片（姓名、签名、位置、所属组织、PRO 徽章）。
+
+这不是 App 没配好，而是 GitHub 对 Bot 类型账号的通用行为：
+
+| 账号 | `GET /users/<login>/hovercard` |
+| --- | --- |
+| `SirTamago`（User） | `200` |
+| `dsh-rimielab[bot]` | `404` |
+| `dependabot[bot]` | `404` |
+| `github-actions[bot]` | `404` |
+| `renovate[bot]` | `404` |
+
+原因：hovercard 渲染的就是个人资料页的内容，而 Bot 账号没有个人资料页 ——
+`github.com/dsh-rimielab[bot]` 本身就返回 404，它的 `html_url` 指向
+`https://github.com/apps/dsh-rimielab`，且 `name` / `bio` / `location` / `company` 全为 `null`。
+
+结论：**想要 hovercard 就只能用真实 user 账号**。机器人身份能给的是一个独立身份、
+自定义头像、以及指向 App 页面的链接。
+
 ## 贡献者
 
 <table>
