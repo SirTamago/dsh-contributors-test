@@ -76,6 +76,13 @@ git -c user.name="DeepSeek Harness" \
 普通评论则会通知该 thread 的订阅者，不想收就打开 issue → 右侧栏 → **Unsubscribe**
 （每个账号各设一次即可）。
 
+这个工作流是**通用**的，可以直接复制到其他仓库：
+
+- 监听 `main` 和 `master`，也支持在 Actions 页面 `workflow_dispatch` 手动触发一次；
+- **自举**：`devlog` 标签和 issue 不存在时会自动创建，正文只在创建时写一次；
+- 换仓库只需两件事：把该仓库纳入 App 的授权范围，并给它加上同名 secret；
+- 若目标仓库关闭了 Issues，先到 Settings → General → Features 打开。
+
 启用只需一次：
 
 1. App 设置 → **Private keys** → Generate a private key，下载 `.pem`；
