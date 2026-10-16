@@ -58,7 +58,7 @@ jobs:
           {
             echo "### 工作段 · $(TZ=UTC date '+%Y-%m-%d %H:%M UTC')"
             echo
-            echo "推送者 @${PUSHER} ｜ [\`${BEFORE:0:7}...${AFTER:0:7}\`](${COMPARE})"
+            echo "推送者 \`${PUSHER}\` ｜ [\`${BEFORE:0:7}...${AFTER:0:7}\`](${COMPARE})"
             echo
             echo "| 提交 | 作者 | 说明 |"
             echo "| --- | --- | --- |"
