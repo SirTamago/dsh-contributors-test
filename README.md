@@ -139,8 +139,9 @@
 ## 工作记录
 
 项目的进度与每次改动都记在 **[devlog issue #2](https://github.com/SirTamago/dsh-contributors-test/issues/2)**，
-由 `dsh-rimielab[bot]` 维护：**每次推送的摘要追加到正文顶部**（最新在上），
-不新增评论 —— 编辑正文不会触发邮件通知，规则写在正文里。
+由 `dsh-rimielab[bot]` 维护：**每次推送追加一条 comment**，一个工作段一条，
+不新开 issue，约定写在 issue 正文里。记录里不出现 `@用户名`，以免误触发通知；
+评论仍会通知 thread 订阅者，不想收就 Unsubscribe。
 
 写入由 [`.github/workflows/devlog.yml`](.github/workflows/devlog.yml) 自动完成 ——
 每次 push 到 `main`，机器人就把本次推送的提交摘要追加进去。配置方式见

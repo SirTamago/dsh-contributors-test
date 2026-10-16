@@ -68,13 +68,13 @@ git -c user.name="DeepSeek Harness" \
 
 ## 自动工作记录（Devlog）
 
-`.github/workflows/devlog.yml` 会在每次 push 到 `main` 时，把本次推送的提交摘要**追加到
-[devlog issue #2](https://github.com/SirTamago/dsh-contributors-test/issues/2) 的正文顶部**
-（最新在上），作者是 `dsh-rimielab[bot]`。
+`.github/workflows/devlog.yml` 会在每次 push 到 `main` 时，追加一条 comment 到
+[devlog issue #2](https://github.com/SirTamago/dsh-contributors-test/issues/2)，
+作者是 `dsh-rimielab[bot]`。issue 正文只放约定，每次运行自动刷新。
 
-用**编辑正文**而不是新增评论，是为了不触发邮件通知 —— GitHub 对编辑不发通知，对评论会。
-正文只保留最近 25 条记录，更早的可在 issue 的编辑历史里翻。正文里也刻意不出现 `@`，
-避免误触发 mention 通知。
+记录里刻意不出现 `@用户名` —— mention 会**重新激活**已经退订的 thread，那是真正会误伤的路径。
+普通评论则会通知该 thread 的订阅者，不想收就打开 issue → 右侧栏 → **Unsubscribe**
+（每个账号各设一次即可）。
 
 启用只需一次：
 
