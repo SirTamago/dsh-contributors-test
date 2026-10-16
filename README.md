@@ -135,6 +135,16 @@
 
 > 上表的头像由本文件的 `<img>` 渲染，与侧栏那个 Contributors 盒子无关 —— 后者只认账号。
 
+
+## 工作记录
+
+项目的进度与每次改动都记在 **[devlog issue #2](https://github.com/SirTamago/dsh-contributors-test/issues/2)**，
+由 `dsh-rimielab[bot]` 维护：**一个工作段一条 comment**，不新开 issue，规则写在 issue 正文里。
+
+写入由 [`.github/workflows/devlog.yml`](.github/workflows/devlog.yml) 自动完成 ——
+每次 push 到 `main`，机器人就把本次推送的提交摘要追加进去。配置方式见
+[SETUP.md](SETUP.md#自动工作记录devlog)。
+
 ## 头像素材
 
 头像使用 **DeepSeek 官方蓝鲸标识**，不是自行设计的图形。来源与再生成方式见

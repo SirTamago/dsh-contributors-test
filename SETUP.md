@@ -65,3 +65,26 @@ git -c user.name="DeepSeek Harness" \
 
 两种邮箱都是 GitHub 官方保留的 noreply 形式，能直接关联到对应账号，
 **不需要**域名验证，也不会泄露真实邮箱。
+
+## 自动工作记录（Devlog）
+
+`.github/workflows/devlog.yml` 会在每次 push 到 `main` 时，把本次推送的提交摘要追加成
+[devlog issue #2](https://github.com/SirTamago/dsh-contributors-test/issues/2) 的一条
+comment，作者是 `dsh-rimielab[bot]`。
+
+启用只需一次：
+
+1. App 设置 → **Private keys** → Generate a private key，下载 `.pem`；
+2. 仓库 Settings → Secrets and variables → Actions → **New repository secret**：
+   - Name: `DSH_APP_PRIVATE_KEY`
+   - Secret: 把 `.pem` 的**全文**粘进去（含 `BEGIN` / `END` 两行）；
+3. 删掉本地那份 `.pem`。
+
+未配置该 secret 时，工作流只输出一条 warning，不会失败。
+
+令牌是每次运行现换现用的（1 小时有效，任务结束由 action 自动吊销），
+仓库里不保存任何长期凭据 —— 长期凭据只有那个 secret，且只存在于 GitHub 的加密存储里。
+
+> 注：`actions/create-github-app-token` 从 v3 起推荐把 `app-id` 换成 `client-id`
+> （App 设置 → About → Client ID）。当前用 `app-id` 仍可运行，只是会打一条弃用警告；
+> 想消掉警告，把 workflow 里的 `app-id: "5321359"` 改成 `client-id: "Iv…"` 即可。

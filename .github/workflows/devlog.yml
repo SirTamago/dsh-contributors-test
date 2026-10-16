@@ -1,0 +1,81 @@
+# 每次 push 到 main，就把本次推送的提交摘要追加到 devlog issue。
+# 作者身份是 GitHub App 机器人 dsh-rimielab[bot]。
+#
+# 首次使用需要在本仓库配置一个 secret：
+#   DSH_APP_PRIVATE_KEY = App 设置里 "Generate a private key" 下载的 .pem 全文
+# 未配置时本工作流只输出 warning，不会失败。
+
+name: Devlog
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}          # 不使用 GITHUB_TOKEN，全部走 App 安装令牌
+
+concurrency:
+  group: devlog
+  cancel-in-progress: false
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查 secret 是否就绪
+        id: guard
+        env:
+          KEY: ${{ secrets.DSH_APP_PRIVATE_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::warning::尚未配置 DSH_APP_PRIVATE_KEY，跳过记录（见 SETUP.md）"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 换取 App 安装令牌
+        if: steps.guard.outputs.skip != 'true'
+        id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: "5321359"     # v3 起推荐改用 client-id，见 SETUP.md
+          private-key: ${{ secrets.DSH_APP_PRIVATE_KEY }}
+          permission-issues: write
+
+      - name: 追加一条工作记录
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PUSHER: ${{ github.event.pusher.name }}
+          COMPARE: ${{ github.event.compare }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          COMMITS: ${{ toJSON(github.event.commits) }}
+        run: |
+          set -euo pipefail
+          ENTRY=/tmp/entry.md
+
+          {
+            echo "### 工作段 · $(TZ=UTC date '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "推送者 @${PUSHER} ｜ [\`${BEFORE:0:7}...${AFTER:0:7}\`](${COMPARE})"
+            echo
+            echo "| 提交 | 作者 | 说明 |"
+            echo "| --- | --- | --- |"
+            if [ -z "${COMMITS:-}" ] || [ "${COMMITS}" = "null" ] || [ "${COMMITS}" = "[]" ]; then
+              echo "| \`${AFTER:0:7}\` | — | （本次推送未携带提交明细） |"
+            else
+              echo "${COMMITS}" | jq -r '.[] | "| `\(.id[0:7])` | \(.author.name // .author.username // "?") | \(.message | split("\n")[0] | gsub("\\|"; "\\|")) |"'
+            fi
+            echo
+          } > "$ENTRY"
+
+          num=$(gh issue list --repo "$GITHUB_REPOSITORY" --label devlog --state open \
+                  --json number --jq 'sort_by(.number) | .[0].number // empty')
+          if [ -z "$num" ]; then
+            echo "::error::找不到带 devlog 标签的 open issue"
+            exit 1
+          fi
+
+          gh issue comment "$num" --repo "$GITHUB_REPOSITORY" --body-file "$ENTRY"
+          echo "已记录到 issue #$num"
