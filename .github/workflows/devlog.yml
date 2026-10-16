@@ -1,4 +1,5 @@
-# 每次 push 到 main，就把本次推送的提交摘要追加到 devlog issue。
+# 每次 push 到 main，就把本次推送的摘要写进 devlog issue 的**正文顶部**。
+# 用编辑正文而不是新增评论 —— GitHub 对编辑不发通知，这样不会有邮件打扰。
 # 作者身份是 GitHub App 机器人 dsh-rimielab[bot]。
 #
 # 首次使用需要在本仓库配置一个 secret：
@@ -42,7 +43,7 @@ jobs:
           private-key: ${{ secrets.DSH_APP_PRIVATE_KEY }}
           permission-issues: write
 
-      - name: 追加一条工作记录
+      - name: 把本次推送写进 devlog 正文
         if: steps.guard.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
@@ -53,8 +54,15 @@ jobs:
           COMMITS: ${{ toJSON(github.event.commits) }}
         run: |
           set -euo pipefail
-          ENTRY=/tmp/entry.md
 
+          num=$(gh issue list --repo "$GITHUB_REPOSITORY" --label devlog --state open \
+                  --json number --jq 'sort_by(.number) | .[0].number // empty')
+          if [ -z "$num" ]; then
+            echo "::error::找不到带 devlog 标签的 open issue"
+            exit 1
+          fi
+
+          # 1) 本次记录。注意：正文里一律不出现 @，否则会触发 mention 通知。
           {
             echo "### 工作段 · $(TZ=UTC date '+%Y-%m-%d %H:%M UTC')"
             echo
@@ -68,14 +76,50 @@ jobs:
               echo "${COMMITS}" | jq -r '.[] | "| `\(.id[0:7])` | \(.author.name // .author.username // "?") | \(.message | split("\n")[0] | gsub("\\|"; "\\|")) |"'
             fi
             echo
-          } > "$ENTRY"
+          } > /tmp/entry.md
 
-          num=$(gh issue list --repo "$GITHUB_REPOSITORY" --label devlog --state open \
-                  --json number --jq 'sort_by(.number) | .[0].number // empty')
-          if [ -z "$num" ]; then
-            echo "::error::找不到带 devlog 标签的 open issue"
-            exit 1
-          fi
+          # 2) 固定头部
+          {
+            echo "这个 issue 是本仓库的工作日志，由 \`dsh-rimielab[bot]\` 维护。"
+            echo
+            echo "## 约定"
+            echo
+            echo "- 每次 push 到 \`main\`，机器人把本次推送的摘要**追加到本正文顶部**（最新在上）。"
+            echo "- 用**编辑正文**而不是新增评论 —— 编辑不会触发邮件通知。"
+            echo "- 正文只保留最近 25 条，更早的可在本 issue 的编辑历史里翻。"
+            echo "- 正文里不会出现 @，避免误触发 mention 通知。"
+            echo "- 2026-10-16 及更早的记录以评论形式保留在本 issue 下方。"
+            echo
+            echo "<!-- DEVLOG:ENTRIES 最新在上，勿手工调序 -->"
+          } > /tmp/prefix.md
 
-          gh issue comment "$num" --repo "$GITHUB_REPOSITORY" --body-file "$ENTRY"
-          echo "已记录到 issue #$num"
+          # 3) 现有正文（取标记之后的既有记录）
+          gh issue view "$num" --repo "$GITHUB_REPOSITORY" --json body -q .body > /tmp/body.md || true
+          touch /tmp/body.md
+
+          # 4) 合并：新记录在最上，整体裁剪到 25 条
+          python3 - <<'PY'
+          import pathlib, re
+
+          prefix = pathlib.Path("/tmp/prefix.md").read_text(encoding="utf-8")
+          entry = pathlib.Path("/tmp/entry.md").read_text(encoding="utf-8")
+          body = pathlib.Path("/tmp/body.md").read_text(encoding="utf-8")
+
+          marker = "<!-- DEVLOG:ENTRIES"
+          if marker in body:
+              tail = body.split(marker, 1)[1]
+              entries = tail.split("-->", 1)[1] if "-->" in tail else tail
+          else:
+              entries = ""
+
+          merged = entry.strip() + ("\n\n" + entries.strip() if entries.strip() else "")
+          parts = [p for p in re.split(r"(?=^### 工作段)", merged, flags=re.M) if p.strip()]
+          parts = parts[:25]
+
+          out = prefix.rstrip() + "\n\n" + "\n\n".join(p.strip() for p in parts) + "\n"
+          pathlib.Path("/tmp/body.new.md").write_text(out, encoding="utf-8")
+          print(f"记录条数: {len(parts)}，正文 {len(out)} 字符")
+          PY
+
+          gh issue edit "$num" --repo "$GITHUB_REPOSITORY" --body-file /tmp/body.new.md
+          echo "已更新 issue #$num 正文"
