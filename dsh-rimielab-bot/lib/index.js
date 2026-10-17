@@ -346,8 +346,7 @@ export function apply(ctx, rawConfig) {
   const inFlight = new Map()
   const log = (message) => console.warn(message)
 
-  const setupAgent = async (agent) => {
-    const cwd = agent?.session?.header?.cwd ?? ctx.get('workingDirectory')?.get(agent?.session)
+  const setupAt = async (cwd) => {
     const root = await findRepoRoot(cwd)
     if (!root) return
     if (await exists(path.join(root, config.keepIdentityFile))) return
@@ -364,6 +363,16 @@ export function apply(ctx, rawConfig) {
     return promise
   }
 
+  const setupAgent = (agent) => {
+    let cwd
+    try {
+      cwd = ctx.get('workingDirectory')?.get(agent?.session)
+    } catch {
+      cwd = undefined
+    }
+    return setupAt(cwd ?? agent?.session?.header?.cwd)
+  }
+
   ctx.systemPrompt.section({
     name: 'plugin:dsh-rimielab-bot',
     order: 9000,
@@ -377,6 +386,17 @@ export function apply(ctx, rawConfig) {
     } catch (error) {
       log(`[dsh-rimielab-bot] setup failed: ${error instanceof Error ? error.message : String(error)}`)
     }
+  })
+
+  // A subagent can start in another directory, and the model can change the
+  // session directory mid-conversation; both are committed as this event.
+  ctx.on('session/event', (session, event) => {
+    if (event?.type !== 'working-directory/change') return
+    const cwd = event.data?.cwd
+    if (typeof cwd !== 'string' || cwd.length === 0) return
+    void setupAt(cwd).catch((error) => {
+      log(`[dsh-rimielab-bot] setup failed for ${cwd}: ${error instanceof Error ? error.message : String(error)}`)
+    })
   })
 
   // A plugin can be installed while sessions are already live.
