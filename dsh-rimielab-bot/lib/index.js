@@ -1,10 +1,11 @@
 /**
  * dsh-rimielab-bot
  *
- * Host-only bundle. When enabled it makes every git repository a session works
- * in use the GitHub App bot identity `dsh-rimielab[bot]`, keeps `.mailmap` and
- * `CONTRIBUTORS.md` in sync for both the bot and the human owner, and installs
- * the self-bootstrapping devlog workflow when the repository is on GitHub.
+ * Host-only bundle. When enabled it keeps the human owner as the commit author
+ * in every git repository a session works in, adds `dsh-rimielab[bot]` as a
+ * `Co-authored-by` trailer, keeps `.mailmap` and `CONTRIBUTORS.md` in sync for
+ * both identities, and installs the self-bootstrapping devlog workflow when the
+ * repository is on GitHub.
  *
  * Escape hatch: put `.dsh-keep-identity` in a repository root.
  */
@@ -163,17 +164,17 @@ function sameEmail(left, right) {
   return typeof left === 'string' && typeof right === 'string' && left.trim().toLowerCase() === right.trim().toLowerCase()
 }
 
-/** Ensure the repository-local identity is the bot, remembering what to restore. */
+/** Ensure the repository-local identity is the human author, remembering what to restore. */
 export async function configureIdentity(root, config) {
   const currentName = await gitGet(root, 'user.name')
   const currentEmail = await gitGet(root, 'user.email')
-  if (currentName === config.botName && sameEmail(currentEmail, config.botEmail)) {
+  if (currentName === config.humanName && sameEmail(currentEmail, config.humanEmail)) {
     return { changed: false, previous: null }
   }
 
   const previous = { name: currentName, email: currentEmail }
-  await gitSet(root, 'user.name', config.botName)
-  await gitSet(root, 'user.email', config.botEmail)
+  await gitSet(root, 'user.name', config.humanName)
+  await gitSet(root, 'user.email', config.humanEmail)
   return { changed: true, previous }
 }
 
@@ -213,16 +214,16 @@ function contributorsBlock(config) {
     '',
     '| 贡献者 | 账号 | 头像 | 提交邮箱 | 角色 |',
     '| --- | --- | --- | --- | --- |',
-    `| ${cell(config.botName)} | \`${cell(config.botLogin)}\` | <img src="${config.botAvatar}" width="24" height="24" alt="" /> | \`${cell(config.botEmail)}\` | AI coding agent · 全部机器人提交 |`,
-    `| ${cell(config.humanName)} | [@${cell(config.humanLogin)}](https://github.com/${config.humanLogin}) | <img src="${config.humanAvatar}" width="24" height="24" alt="" /> | \`${cell(config.humanEmail)}\` | 仓库所有者 · co-author |`,
+    `| ${cell(config.humanName)} | [@${cell(config.humanLogin)}](https://github.com/${config.humanLogin}) | <img src="${config.humanAvatar}" width="24" height="24" alt="" /> | \`${cell(config.humanEmail)}\` | 仓库所有者 · author |`,
+    `| ${cell(config.botName)} | \`${cell(config.botLogin)}\` | <img src="${config.botAvatar}" width="24" height="24" alt="" /> | \`${cell(config.botEmail)}\` | AI coding agent · co-author |`,
     '',
-    '机器人提交会在提交信息末尾带一行：',
+    '人类提交会在提交信息末尾带一行：',
     '',
     '```text',
-    `Co-authored-by: ${config.humanName} <${config.humanEmail}>`,
+    `Co-authored-by: ${config.botName} <${config.botEmail}>`,
     '```',
     '',
-    '这样人类账号也会计入 GitHub 的贡献者统计，而不需要让出 author 位置。',
+    '这样机器人也会计入 GitHub 的贡献者统计，author 仍然是你。',
     CONTRIBUTORS_END,
   ].join('\n')
 }
@@ -307,21 +308,22 @@ export async function setupRepository(root, config, log = () => {}) {
 /** Build the model-facing policy section for the current config. */
 export function promptText(config) {
   return [
-    '## dsh-rimielab[bot] repository policy',
+    '## dsh-rimielab[bot] co-author policy',
     '',
-    'This profile is configured to commit as the GitHub App bot identity:',
+    'This profile keeps your GitHub account as the commit author and adds the GitHub App bot as co-author:',
     '',
-    `- author/committer: \`${config.botName} <${config.botEmail}>\``,
-    `- GitHub account: \`${config.botLogin}\``,
+    `- author/committer: \`${config.humanName} <${config.humanEmail}>\``,
+    `- co-author: \`${config.botName} <${config.botEmail}>\``,
+    `- bot GitHub account: \`${config.botLogin}\``,
     '',
     'The `dsh-rimielab-bot` plugin sets the repository-local git identity when a session starts,',
-    'so a plain `git commit` already uses the bot. Do not override it with a human `-c user.*`',
-    'unless the user explicitly asks for that repository.',
+    'so a plain `git commit` already uses your account as the author. Do not override it with the',
+    'bot identity unless the user explicitly asks for that repository.',
     '',
-    'Add this trailer to every commit so the human owner also counts in GitHub contributors:',
+    'Add this trailer to every commit so the bot also counts in GitHub contributors:',
     '',
     '```text',
-    `Co-authored-by: ${config.humanName} <${config.humanEmail}>`,
+    `Co-authored-by: ${config.botName} <${config.botEmail}>`,
     '```',
     '',
     `If \`${config.keepIdentityFile}\` exists in a repository root, the plugin is disabled there;`,
@@ -407,14 +409,14 @@ export function apply(ctx, rawConfig) {
   }
 
   // On disable/unload restore the exact previous local identity, but only when
-  // the current value is still the bot (never overwrite a newer user choice).
+  // the current value is still the human author (never overwrite a newer choice).
   ctx.effect(() => () => {
     for (const [root, prior] of previous) {
       void (async () => {
         try {
           const currentName = await gitGet(root, 'user.name')
           const currentEmail = await gitGet(root, 'user.email')
-          if (currentName !== config.botName || !sameEmail(currentEmail, config.botEmail)) return
+          if (currentName !== config.humanName || !sameEmail(currentEmail, config.humanEmail)) return
           if (prior.name === null) await gitUnset(root, 'user.name')
           else await gitSet(root, 'user.name', prior.name)
           if (prior.email === null) await gitUnset(root, 'user.email')

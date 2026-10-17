@@ -20,13 +20,15 @@ Settings → Developer settings → GitHub Apps → New GitHub App：
 | GitHub App name | `dsh-rimielab` |
 | Homepage URL | `https://github.com/SirTamago/dsh-contributors-test`（必填，GitHub 不校验内容） |
 | Webhook → Active | 取消勾选（否则 Webhook URL 变必填） |
-| Repository permissions | 全部 No access（这个身份只用于署名，不需要任何权限） |
-| Where can this GitHub App be installed | Only on this account |
+| Repository permissions | **Issues: Read and write**（devlog 需要；只做署名时可以全部 No access） |
+| Where can this GitHub App be installed | `Any account`（要装到组织 `RimieLab` 就必须选这个） |
 | Display information → Logo | `assets/avatar.png`（DeepSeek 蓝鲸） |
 
-创建后得到的 **App ID：`342685585`**，机器人登录名：`dsh-rimielab[bot]`。
+创建后得到 **App ID：`5321359`**（工作流里的 `app-id`），机器人登录名 `dsh-rimielab[bot]`，
+bot user ID `342685585`（提交邮箱的前缀）。
 
-这个 App **不需要安装到仓库**，也不需要任何权限 —— 署名只看提交邮箱。
+只做贡献者署名时，这个 App 不需要安装到仓库，也不需要任何权限；但要用 devlog，
+就需要把它安装到目标账号/组织，并授予 Issues 写权限。
 
 ### 3. 提供本地工作区与署名方案
 
@@ -37,22 +39,23 @@ Settings → Developer settings → GitHub Apps → New GitHub App：
 
 ## 提交身份配置
 
-本仓库的**默认**提交身份是人（在仓库目录里 `git config` 即可，不会影响其他仓库）：
+本仓库现在的**默认 author 是人**（在仓库目录里 `git config` 即可，不会影响其他仓库）：
 
 ```bash
 git config user.name  "Rimrose"
 git config user.email "44104592+SirTamago@users.noreply.github.com"
 ```
 
-要以机器人身份提交时，用 `-c` 临时覆盖，不要在仓库里全局改成机器人：
+机器人作为 **co-author**，提交信息末尾带一行即可：
 
-```bash
-git -c user.name="DeepSeek Harness" \
-    -c user.email="342685585+dsh-rimielab[bot]@users.noreply.github.com" \
-    commit -m "..."
+```text
+Co-authored-by: DeepSeek Harness <342685585+dsh-rimielab[bot]@users.noreply.github.com>
 ```
 
-（本文档所在的那次提交就是这么产生的。）
+这样 author 记到你的账号、co-author 记到机器人，两个账号都会出现在 Contributors 统计里。
+历史提交里机器人作为 author 的保持不变，不重写历史。
+
+`dsh-rimielab-bot` 插件启用后会自动设置本地身份并注入这条约定，一般不需要手动执行。
 
 ## 复现要点
 
@@ -60,9 +63,10 @@ git -c user.name="DeepSeek Harness" \
 
 | 身份 | 提交邮箱 |
 | --- | --- |
-| 人 | `<user id>+<login>@users.noreply.github.com` |
-| GitHub App 机器人 | `<App ID>+<app-slug>[bot]@users.noreply.github.com` |
+| 人（author） | `<user id>+<login>@users.noreply.github.com` |
+| GitHub App 机器人（co-author） | `<bot user ID>+<app-slug>[bot]@users.noreply.github.com` |
 
+注意：邮箱前缀是 **bot user ID**（本仓库 `342685585`），不是 App ID（`5321359`）。
 两种邮箱都是 GitHub 官方保留的 noreply 形式，能直接关联到对应账号，
 **不需要**域名验证，也不会泄露真实邮箱。
 
@@ -80,16 +84,25 @@ git -c user.name="DeepSeek Harness" \
 
 - 监听 `main` 和 `master`，也支持在 Actions 页面 `workflow_dispatch` 手动触发一次；
 - **自举**：`devlog` 标签和 issue 不存在时会自动创建，正文只在创建时写一次；
-- 换仓库只需两件事：把该仓库纳入 App 的授权范围，并给它加上同名 secret；
+- `dsh-rimielab-bot` 插件进入新仓库时会自动补上这个 workflow（已有则不动）；
 - 若目标仓库关闭了 Issues，先到 Settings → General → Features 打开。
 
-启用只需一次：
+启用 secret 有两种方式：
+
+**A. 逐仓库**（个人账号）
 
 1. App 设置 → **Private keys** → Generate a private key，下载 `.pem`；
 2. 仓库 Settings → Secrets and variables → Actions → **New repository secret**：
    - Name: `DSH_APP_PRIVATE_KEY`
    - Secret: 把 `.pem` 的**全文**粘进去（含 `BEGIN` / `END` 两行）；
 3. 删掉本地那份 `.pem`。
+
+**B. 组织级**（例如 `RimieLab`，推荐）
+
+1. App 可见性改成 **Any account**，然后 Install App → `RimieLab` → **All repositories**；
+2. 组织 Settings → Secrets and variables → Actions → **New organization secret**：
+   `DSH_APP_PRIVATE_KEY`，Repository access 选 **All repositories**；
+3. 之后组织下新建的仓库也会自动拿到 secret 和 App 安装范围，不需要逐仓库配置。
 
 未配置该 secret 时，工作流只输出一条 warning，不会失败。
 

@@ -135,6 +135,9 @@
 
 > 上表的头像由本文件的 `<img>` 渲染，与侧栏那个 Contributors 盒子无关 —— 后者只认账号。
 
+> 自 2026-10-18 起，默认提交署名为：**Rimrose 是 author，`dsh-rimielab[bot]` 是 co-author**
+> （由 [`dsh-rimielab-bot` 插件](dsh-rimielab-bot/README.md)自动应用）。上表与历史提交保留原署名。
+
 
 ## 工作记录
 

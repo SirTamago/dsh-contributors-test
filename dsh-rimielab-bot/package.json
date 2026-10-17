@@ -1,21 +1,21 @@
 {
   "name": "dsh-rimielab-bot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Commit as dsh-rimielab[bot], keep devlog and contributor metadata in sync",
+  "description": "Keep you as the commit author while dsh-rimielab[bot] co-authors, with devlog and contributor metadata in sync",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
     "./locale/*.json": "./locale/*.json",
-    "./icon": "./icon.svg"
+    "./icon": "./icon.png"
   },
-  "icon": "./icon.svg",
+  "icon": "./icon.png",
   "files": [
     "lib",
     "templates",
     "locale",
-    "icon.svg",
+    "icon.png",
     "cordis.patch.yml",
     "README.md"
   ],

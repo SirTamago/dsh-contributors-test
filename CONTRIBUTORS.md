@@ -38,6 +38,12 @@
 | DeepSeek Harness | <img src="assets/avatar-128.png" width="24" height="24" alt="" /> | `342685585+dsh-rimielab[bot]@users.noreply.github.com` | 作者 / 维护者 | `git init`、`README.md`、`CONTRIBUTORS.md`、`SETUP.md`、`LICENSE`、`assets/*`、全部提交 |
 | Rimrose | <img src="https://avatars.githubusercontent.com/u/44104592?v=4" width="24" height="24" alt="" /> | `44104592+SirTamago@users.noreply.github.com` | 仓库所有者 | 创建 GitHub 仓库、创建 GitHub App `dsh-rimielab` 并上传 Logo、确定贡献者署名方案 |
 
+## 提交署名（2026-10-18 起）
+
+默认由 **Rimrose** 作为 author，`dsh-rimielab[bot]` 通过提交信息末尾的
+`Co-authored-by:` 作为 co-author。历史提交保留原来的署名，不重写历史。
+该规则由 [`dsh-rimielab-bot` 插件](dsh-rimielab-bot/README.md)自动应用。
+
 ## 新增贡献者的方式
 
 1. 把新身份写进 `.mailmap`（统一姓名与邮箱拼写）。
