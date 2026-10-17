@@ -6,6 +6,8 @@
 2. **Contributors**：补齐 `.mailmap`，并在 `CONTRIBUTORS.md` 里维护一个同时包含你的账号和机器人的区块；
 3. **Devlog**：如果仓库有 GitHub remote 且还没有 devlog 工作流，就放一份自举版 `.github/workflows/devlog.yml`。
 
+会话中途切换目录（包括子代理从别的目录启动）时，插件也会对新目录所在的仓库执行同样的一次性设置。
+
 插件同时会向模型注入一段提交约定：每次提交都带一行 `Co-authored-by:`，这样 GitHub 的 Contributors 统计会同时记到你的账号和机器人；devlog 里不要写 `@`。
 
 ## 安装
