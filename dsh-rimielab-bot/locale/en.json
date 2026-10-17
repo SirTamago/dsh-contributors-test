@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-rimielab Bot Commit",
+    "description": "Automatically commits as dsh-rimielab[bot], installs the devlog workflow, and keeps the bot plus your account in CONTRIBUTORS."
+  }
+}

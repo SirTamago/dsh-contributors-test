@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "dsh-rimielab 提交机器人",
+    "description": "启用后自动以 dsh-rimielab[bot] 身份提交，自动配置 devlog 工作流，并把你的账号和机器人一起写入 CONTRIBUTORS。"
+  }
+}

@@ -1,0 +1,14 @@
+# dsh-rimielab-bot —— bundle patch
+#
+# 开启后，每个会话启动时会在其所在的 git 仓库里：
+#   1. 把仓库本地的提交身份设为 dsh-rimielab[bot]；
+#   2. 补齐 .mailmap 与 CONTRIBUTORS.md 里的两个身份；
+#   3. 如果仓库有 GitHub remote 且没有 devlog 工作流，就放一份自举版进去。
+#
+# 不想让某个仓库被接管：在该仓库根目录放一个 .dsh-keep-identity 文件。
+
+- insert:
+    - id: dsh-rimielab-bot
+      name: dsh-rimielab-bot
+      config:
+        enabled: true
